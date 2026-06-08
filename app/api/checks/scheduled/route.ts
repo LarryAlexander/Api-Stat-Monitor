@@ -4,12 +4,13 @@ import { runChecksInBatches } from "@/lib/check-runner";
 import { after } from "next/server";
 
 export async function POST(request: NextRequest) {
-  // Validate CRON_SECRET token
+  // Validate CRON_SECRET token — deny if secret is not configured OR token doesn't match
   const authHeader = request.headers.get("Authorization");
   const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && token !== cronSecret) {
+  // Require the secret to be set; if absent in env, lock the endpoint down entirely
+  if (!cronSecret || token !== cronSecret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -44,3 +44,5 @@ next-env.d.ts
 
 # local tooling
 .playwright-mcp/
+playwright-report/
+test-results/
