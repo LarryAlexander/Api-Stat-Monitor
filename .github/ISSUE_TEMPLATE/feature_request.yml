@@ -1,0 +1,80 @@
+name: 🚀 Feature Request
+description: Suggest a new feature or improvement for PulseBoard
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to make PulseBoard better? We'd love to hear it!
+        Please check the [Roadmap](../ROADMAP.md) first to see if it's already planned.
+
+  - type: checkboxes
+    id: existing-issue
+    attributes:
+      label: Is there an existing issue or roadmap item for this?
+      options:
+        - label: I have searched existing issues and the ROADMAP.md — this is not already tracked.
+          required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What area of PulseBoard does this relate to?
+      options:
+        - Monitoring (checks, scheduling, status)
+        - Alerting (email, webhooks, notifications)
+        - Dashboard & UI
+        - Billing & Plans
+        - API
+        - Self-Hosting & DevOps
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem? Describe it clearly.
+      placeholder: "I'm frustrated when... / It's hard to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature you'd like to see. Be as specific as possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: How important is this to you?
+      options:
+        - Critical — blocks my use of PulseBoard
+        - High — significantly improves my workflow
+        - Medium — nice to have
+        - Low — minor improvement
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add screenshots, mockups, or any other relevant context.

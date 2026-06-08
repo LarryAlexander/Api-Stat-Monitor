@@ -1,0 +1,25 @@
+# CODEOWNERS — https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# These owners will be automatically requested for review when someone opens
+# a pull request that modifies files they own.
+#
+# Format: <pattern>  <owner1> <owner2>
+
+# Default owner for everything
+*                   @LarryAlexander
+
+# Core library and data layer — extra care required
+/lib/               @LarryAlexander
+/app/api/           @LarryAlexander
+
+# Billing — high sensitivity
+/app/api/billing/   @LarryAlexander
+
+# CI/CD and GitHub config
+/.github/           @LarryAlexander
+
+# Security policy
+SECURITY.md         @LarryAlexander
+
+# Documentation
+*.md                @LarryAlexander

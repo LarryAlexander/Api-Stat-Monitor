@@ -1,0 +1,107 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior in PulseBoard
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the sections below as completely as possible.
+
+  - type: checkboxes
+    id: existing-issue
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+        - label: I have searched the existing issues and this is not a duplicate.
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the bug is.
+      placeholder: "When I click the 'Add Monitor' button, the modal does not open..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: List the exact steps needed to reproduce the behavior.
+      placeholder: |
+        1. Go to the Dashboard
+        2. Click 'Add Monitor'
+        3. Fill in the form
+        4. Click 'Save'
+        5. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened? Include screenshots or error messages if applicable.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment Type
+      description: How are you running PulseBoard?
+      options:
+        - Self-hosted (Docker)
+        - Self-hosted (Node.js / npm)
+        - PulseBoard Cloud (hosted)
+        - Local development
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: PulseBoard Version
+      description: What version of PulseBoard are you running? (Check `package.json` or the About page)
+      placeholder: "e.g., v0.2.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: |
+        Please provide relevant environment information.
+      value: |
+        - OS: [e.g. macOS 14.5, Ubuntu 22.04]
+        - Node.js: [e.g. 20.x]
+        - Browser: [e.g. Chrome 125, Firefox 127]
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs or Error Output
+      description: Paste any relevant logs here. This will be formatted as code automatically.
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context, links, or screenshots about the problem here.
