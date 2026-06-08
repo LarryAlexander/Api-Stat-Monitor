@@ -92,4 +92,28 @@ PulseBoard uses a toggle-based billing system to support both open-source users 
 
 ## License
 
-This project is open-source and licensed under the [MIT License](./LICENSE).
+PulseBoard is licensed under the **[Elastic License 2.0 (ELv2)](./LICENSE)**.
+
+### What this means in plain English
+
+| | Allowed |
+|---|---|
+| ✅ | Use PulseBoard for your own projects |
+| ✅ | Self-host it for your team or company |
+| ✅ | Read, study, and modify the source code |
+| ✅ | Contribute improvements back via Pull Requests |
+| ✅ | Fork it for personal or internal use |
+| ❌ | Offer it as a **hosted/managed service** to third parties |
+
+The one restriction: you cannot take this code and run your own competing "PulseBoard as a Service." That's how we keep the lights on.
+
+Everything else — self-hosting, contributions, internal use, learning from it — is completely free and welcome.
+
+### Want to contribute?
+
+Read [CONTRIBUTING.md](./CONTRIBUTING.md). We actively welcome bug fixes, features, and improvements. When you contribute, your changes become part of PulseBoard under the same ELv2 license.
+
+### Commercial / OEM licensing
+
+Need to embed PulseBoard in a commercial product, or want to run it as a managed service? Get in touch via [GitHub Discussions](https://github.com/LarryAlexander/Api-Stat-Monitor/discussions) to discuss commercial licensing terms.
+

@@ -2,7 +2,11 @@
 
 First off — thank you for your interest in contributing! 🎉
 
-PulseBoard is an open-core project and we welcome contributions of all kinds: bug fixes, features, documentation improvements, and feedback.
+PulseBoard is **source-available** under the [Elastic License 2.0 (ELv2)](./LICENSE). Contributions of all kinds are welcome: bug fixes, features, documentation improvements, and feedback.
+
+By contributing, you agree that your changes will be included in PulseBoard under the same ELv2 license. This means the project stays open and improvable by the community, while the hosted service model remains sustainable.
+
+**What ELv2 means for contributors:** You can use, modify, and self-host freely. The only restriction is you cannot offer PulseBoard itself as a competing managed/hosted service. Everything else — including contributing — is wide open.
 
 ---
 
