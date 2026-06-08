@@ -1,17 +1,24 @@
 {
-  "name": "pulseboard-init-1780939932",
+  "name": "api-stat-monitor",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:emulators": "firebase emulators:start --only auth,firestore",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "firebase:deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes"
   },
   "dependencies": {
+    "firebase": "^12.2.1",
+    "firebase-admin": "^13.4.0",
+    "lucide-react": "^1.17.0",
     "next": "16.2.7",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "recharts": "^3.8.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
