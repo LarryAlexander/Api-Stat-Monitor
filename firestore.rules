@@ -10,21 +10,38 @@ service cloud.firestore {
       return isSignedIn() &&
         get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.owner_id == request.auth.uid;
     }
+    
+    function ownsMonitor(monitorId) {
+      let monitor = get(/databases/$(database)/documents/monitors/$(monitorId));
+      return monitor != null && isOwner(monitor.data.workspace_id);
+    }
 
     match /workspaces/{workspaceId} {
-      allow read, write: if isSignedIn() && request.auth.uid == workspaceId;
+      allow read: if isSignedIn() && request.auth.uid == workspaceId;
+      allow create: if isSignedIn() && request.auth.uid == workspaceId
+                    && request.resource.data.owner_id == request.auth.uid;
+      allow update: if isSignedIn() && request.auth.uid == workspaceId
+                    && request.resource.data.owner_id == resource.data.owner_id;
+      allow delete: if isSignedIn() && request.auth.uid == workspaceId;
     }
 
     match /monitors/{monitorId} {
-      allow read, write: if isOwner(resource.data.workspace_id);
+      allow read, delete: if isOwner(resource.data.workspace_id);
+      allow create: if isOwner(request.resource.data.workspace_id);
+      allow update: if isOwner(resource.data.workspace_id) 
+                    && request.resource.data.workspace_id == resource.data.workspace_id;
     }
 
     match /checks/{checkId} {
-      allow read, write: if isSignedIn();
+      allow read: if ownsMonitor(resource.data.monitor_id);
+      allow create: if ownsMonitor(request.resource.data.monitor_id);
+      allow update, delete: if ownsMonitor(resource.data.monitor_id);
     }
 
     match /incidents/{incidentId} {
-      allow read, write: if isSignedIn();
+      allow read: if ownsMonitor(resource.data.monitor_id);
+      allow create: if ownsMonitor(request.resource.data.monitor_id);
+      allow update, delete: if ownsMonitor(resource.data.monitor_id);
     }
   }
 }

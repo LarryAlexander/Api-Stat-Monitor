@@ -1,133 +1,94 @@
-# PulseBoard
+# PulseBoard 🚀
 
-PulseBoard is a developer-focused API status monitor built as a clean SaaS-style dashboard. It lets a user create monitors, run health checks, inspect latency history, and review incidents from a simple workspace.
+PulseBoard is a lightweight, developer-focused API status and latency monitor. Built as a clean, responsive SaaS-style dashboard, it lets you create monitors, track response times, inspect latency history charts, and review outages—all powered by a free-tier database backend.
 
-## Current state
+It is designed to be run as a **completely free self-hosted dashboard** for developers, or configured as a **commercial SaaS platform** using built-in Stripe subscription billing.
 
-This repository is currently in `portfolio-grade MVP` shape:
+---
 
-- Firebase Auth email/password login
-- Firebase-backed monitor CRUD
-- manual health checks
-- incident creation and resolution
-- monitor detail page with history and chart
-- dashboard onboarding
-- demo data toggle
+## Key Features
 
-It is not yet production-ready as a paid hosted service.
+*   🔒 **Secure Workspace Isolation:** User account creation and authentication powered by Firebase Auth.
+*   📊 **Real-Time Monitor Management:** Create, edit, pause, resume, and delete HTTP monitors.
+*   🛡️ **Hardened Check Runner:** Immediately retries failing probes up to 3 times (with a 1-second delay) before declaring an endpoint "down" to prevent false alerts.
+*   ⏱️ **Isolated Background Scheduler:** Uses Next.js 16's stable `after` API to run checks asynchronously without blocking web requests or causing serverless timeouts.
+*   🚨 **Outage & Recovery Alerts:** Dispatches outage alerts and recovery emails automatically via **SMTP** or **Resend API**. Resolves user emails dynamically using Firebase Admin.
+*   📂 **Interactive Incidents History:** Tracks outages and recoveries. Includes server-side status filters (**All**, **Open Only**, **Resolved Only**) using fast Next.js query parameter navigation.
+*   💳 **Stripe Subscription Integration:** Turn on commercial plan limits (e.g. 3-monitor cap on Free plan, unlimited on Pro) using environment toggles, complete with Stripe Checkout, Stripe Webhook updates, and self-service Customer Portal redirects.
 
-## Product goal
+---
 
-PulseBoard should evolve into an `open core + paid hosted` service:
+## Tech Stack
 
-- open source core for local/self-hosted monitoring
-- paid hosted version for convenience, scheduling, alerts, reliability, and team features
+*   **Framework:** Next.js 16.2 (standalone server output)
+*   **Frontend Library:** React 19 + Tailwind CSS
+*   **Database & Auth:** Google Cloud Firestore + Firebase Authentication (Node.js Admin SDK)
+*   **Mailing:** Nodemailer (SMTP) / Resend REST API
+*   **Charts:** Recharts
+*   **Validation:** Zod
+*   **Billing (Optional):** Stripe Node.js SDK
 
-See:
+---
 
-- [instruction.md](/Users/lathekid/Documents/Api-Stat-Monitor/instruction.md)
-- [READINESS_CHECKLIST.md](/Users/lathekid/Documents/Api-Stat-Monitor/READINESS_CHECKLIST.md)
-- [ROADMAP.md](/Users/lathekid/Documents/Api-Stat-Monitor/ROADMAP.md)
-- [PROJECT_MANAGEMENT.md](/Users/lathekid/Documents/Api-Stat-Monitor/PROJECT_MANAGEMENT.md)
+## Local Development (Quick Start)
 
-## Core features
+PulseBoard supports local development using the **Firebase Emulator Suite** so you don't need a live cloud database to write code.
 
-- email/password auth
-- workspace-scoped monitors
-- create, edit, pause, resume, and delete monitors
-- run all checks or single-monitor checks
-- response-time history
-- incident tracking
-- dashboard summary cards
-- demo data toggle for onboarding
-
-## Stack
-
-- Next.js 16
-- React 19
-- TypeScript
-- Tailwind CSS
-- Firebase Auth
-- Cloud Firestore
-- Recharts
-
-## Local development
-
-1. Install dependencies
-
+### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-2. Create local environment file
-
+### 2. Configure Environment variables
+Create a `.env.local` file by copying the example:
 ```bash
 cp .env.example .env.local
 ```
 
-3. Start Firebase emulators
-
+### 3. Start Firebase Emulators
+Make sure you have Java installed to run the emulators:
 ```bash
 npm run dev:emulators
 ```
 
-4. Start the web app
-
+### 4. Run the Web Application
+Open another terminal tab and run:
 ```bash
 npm run dev
 ```
 
-5. Open the app
+The application will be live at `http://localhost:3000`. You can log in using any email/password (e.g. `test@example.com` / `password123`) inside the emulator context.
 
-```bash
-http://127.0.0.1:3001/auth/login
-```
+---
 
-## Firebase project
+## Deployment & Self-Hosting
 
-- project id: `pulseboard-lathe`
-- web app id: `1:570054826036:web:b11f5ae28d47be14149261`
-- local development defaults to Firebase emulators
+PulseBoard is packaged to be extremely easy to deploy.
 
-Production deployment still requires:
+*   **Self-Hosting Guide:** See [SELF_HOSTING.md](./SELF_HOSTING.md) for step-by-step instructions on deploying to **Vercel** or running in a **Docker Container** using `docker-compose.yml`.
+*   **Production Hardening details:** See [DEPLOY.md](./DEPLOY.md) to set up production service accounts and secrets.
 
-- remote Firestore/Auth API enablement
-- Firebase Admin credentials for server-side access
-- deployment environment setup
+---
 
-## Scripts
+## Open Core & Billing Gating
 
-- `npm run dev`
-- `npm run dev:emulators`
-- `npm run lint`
-- `npm run build`
-- `npm run firebase:deploy:rules`
+PulseBoard uses a toggle-based billing system to support both open-source users and paid setups:
 
-## API routes
+*   **Self-Hosted Mode (Default):** With `NEXT_PUBLIC_BILLING_ENABLED=false`, all limits are removed. You and your users can create unlimited monitors and run checks for free.
+*   **SaaS Mode (Hosted Cloud):** Set `NEXT_PUBLIC_BILLING_ENABLED=true` and configure your `STRIPE_SECRET_KEY` and price IDs. This automatically limits Free users to **3 monitors** and requires an upgrade to the Pro plan via Stripe Checkout to unlock unlimited monitors.
 
-- `GET /api/monitors`
-- `POST /api/monitors`
-- `GET /api/monitors/:id`
-- `PATCH /api/monitors/:id`
-- `DELETE /api/monitors/:id`
-- `POST /api/monitors/:id/run`
-- `GET /api/monitors/:id/history?limit=`
-- `POST /api/checks/run`
-- `GET /api/incidents`
-- `GET /api/demo/seed`
-- `POST /api/demo/seed`
-- `POST /api/session/login`
-- `POST /api/session/logout`
+---
 
-## Production gaps
+## Contributing & Development Scripts
 
-The main missing areas before a real paid launch are:
+*   `npm run dev` — Run development server
+*   `npm run dev:emulators` — Run local Firebase Auth & Firestore emulators
+*   `npm run lint` — Lint code using ESLint
+*   `npm run build` — Compile production Next.js build (using standalone output)
+*   `npm run firebase:deploy:rules` — Deploy Firestore indexes & rules to your live project
 
-- hosted Firebase setup and production secrets
-- reliable recurring scheduler
-- alert delivery
-- plan limits and billing
-- tenant hardening and operational monitoring
-- deployment pipeline and support docs
+---
 
-Use [READINESS_CHECKLIST.md](/Users/lathekid/Documents/Api-Stat-Monitor/READINESS_CHECKLIST.md) as the source of truth for launch readiness.
+## License
+
+This project is open-source and licensed under the [MIT License](./LICENSE).

@@ -8,14 +8,8 @@ import type {
   MonitorStatus,
   MonitorWithState,
   MonitorsResponse,
+  Workspace,
 } from "@/lib/models";
-
-interface Workspace {
-  id: string;
-  owner_id: string;
-  name: string;
-  created_at: string;
-}
 
 const DEMO_MONITOR_FLAG = "seed:demo";
 
@@ -52,6 +46,9 @@ const monitorFromDoc = (id: string, data: FirebaseFirestore.DocumentData): Monit
   headers: data.headers ?? null,
   created_at: toIso(data.created_at),
   updated_at: toIso(data.updated_at),
+  last_checked_at: data.last_checked_at ? toIso(data.last_checked_at) : null,
+  next_check_at: data.next_check_at ? toIso(data.next_check_at) : null,
+  consecutive_failures: data.consecutive_failures ?? 0,
 });
 
 const checkFromDoc = (id: string, data: FirebaseFirestore.DocumentData): CheckRecord => ({
@@ -87,6 +84,9 @@ export async function ensureWorkspace(userId: string) {
       owner_id: userId,
       name: "My Workspace",
       created_at: FieldValue.serverTimestamp(),
+      stripe_customer_id: null,
+      subscription_status: null,
+      subscription_id: null,
     });
   }
 
@@ -176,6 +176,11 @@ export async function createMonitor(
     source?: string | null;
   },
 ) {
+  if (await isWorkspaceGated(workspaceId)) {
+    throw new Error("Plan limit reached. Please upgrade to Pro.");
+  }
+
+  const nextCheck = payload.is_active ? FieldValue.serverTimestamp() : null;
   const ref = await adminDb.collection("monitors").add({
     workspace_id: workspaceId,
     ...payload,
@@ -183,6 +188,9 @@ export async function createMonitor(
     headers: payload.headers ?? null,
     created_at: FieldValue.serverTimestamp(),
     updated_at: FieldValue.serverTimestamp(),
+    last_checked_at: null,
+    next_check_at: nextCheck,
+    consecutive_failures: 0,
   });
 
   const snapshot = await ref.get();
@@ -209,10 +217,21 @@ export async function updateMonitor(
     return null;
   }
 
-  await adminDb.collection("monitors").doc(monitorId).update({
+  const updates: Record<string, any> = {
     ...payload,
     updated_at: FieldValue.serverTimestamp(),
-  });
+  };
+
+  if (payload.is_active !== undefined) {
+    if (payload.is_active && !monitor.is_active) {
+      updates.next_check_at = FieldValue.serverTimestamp();
+      updates.consecutive_failures = 0;
+    } else if (!payload.is_active) {
+      updates.next_check_at = null;
+    }
+  }
+
+  await adminDb.collection("monitors").doc(monitorId).update(updates);
 
   const refreshed = await adminDb.collection("monitors").doc(monitorId).get();
   return monitorFromDoc(refreshed.id, refreshed.data()!);
@@ -439,4 +458,69 @@ export async function clearDemoMonitors(workspaceId: string) {
   await batch.commit();
 
   return snapshot.size;
+}
+
+export async function listDueMonitors(): Promise<Monitor[]> {
+  const snapshot = await adminDb
+    .collection("monitors")
+    .where("is_active", "==", true)
+    .get();
+
+  const allActiveMonitors = snapshot.docs.map((doc) => monitorFromDoc(doc.id, doc.data()));
+
+  return allActiveMonitors.filter((monitor) => {
+    if (!monitor.next_check_at) return true;
+    return new Date(monitor.next_check_at).getTime() <= Date.now();
+  });
+}
+
+export async function updateMonitorStateAfterCheck(
+  monitorId: string,
+  input: {
+    status: MonitorStatus;
+    checkedAt: string;
+    intervalMinutes: number;
+    isFailure: boolean;
+  }
+) {
+  const monitorRef = adminDb.collection("monitors").doc(monitorId);
+
+  await adminDb.runTransaction(async (transaction) => {
+    const doc = await transaction.get(monitorRef);
+    if (!doc.exists) return;
+
+    const data = doc.data()!;
+    let currentFailures = data.consecutive_failures ?? 0;
+
+    if (input.isFailure) {
+      currentFailures += 1;
+    } else {
+      currentFailures = 0;
+    }
+
+    const nextCheckDate = new Date(new Date(input.checkedAt).getTime() + input.intervalMinutes * 60 * 1000);
+
+    transaction.update(monitorRef, {
+      last_checked_at: input.checkedAt,
+      next_check_at: nextCheckDate.toISOString(),
+      consecutive_failures: currentFailures,
+      updated_at: FieldValue.serverTimestamp(),
+    });
+  });
+}
+
+export async function isWorkspaceGated(workspaceId: string): Promise<boolean> {
+  const billingEnabled = process.env.NEXT_PUBLIC_BILLING_ENABLED === "true";
+  if (!billingEnabled) return false;
+
+  const workspace = await ensureWorkspace(workspaceId);
+  const isPro = workspace.subscription_status === "active";
+  if (isPro) return false;
+
+  const snapshot = await adminDb
+    .collection("monitors")
+    .where("workspace_id", "==", workspaceId)
+    .get();
+
+  return snapshot.size >= 3;
 }

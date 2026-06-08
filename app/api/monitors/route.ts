@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createMonitor, ensureWorkspace, getDashboardData } from "@/lib/firebase/data";
+import { createMonitor, ensureWorkspace, getDashboardData, isWorkspaceGated } from "@/lib/firebase/data";
 import { requireUserSession } from "@/lib/firebase/session";
 
 const monitorSchema = z.object({
@@ -33,6 +33,14 @@ export async function POST(request: NextRequest) {
   try {
     const session = await requireUserSession();
     const workspace = await ensureWorkspace(session.uid);
+
+    if (await isWorkspaceGated(workspace.id)) {
+      return NextResponse.json(
+        { message: "Plan limit reached (3 monitors). Please upgrade to Pro." },
+        { status: 403 }
+      );
+    }
+
     const payload = monitorSchema.parse(await request.json());
     const monitor = await createMonitor(workspace.id, payload);
 

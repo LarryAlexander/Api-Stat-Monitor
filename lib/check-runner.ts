@@ -3,8 +3,10 @@ import {
   createIncident,
   getOpenIncident,
   resolveIncident,
+  updateMonitorStateAfterCheck,
 } from "@/lib/firebase/data";
 import { HttpMethod, MonitorStatus } from "./models";
+import { sendOutageAlert, sendRecoveryAlert } from "./alerts";
 
 interface RawCheckPayload {
   monitor_id: string;
@@ -17,10 +19,13 @@ interface RawCheckPayload {
 
 interface MonitorForRun {
   id: string;
+  workspace_id: string;
+  name: string;
   url: string;
   method: HttpMethod;
   expected_status: number;
   headers?: string | null;
+  interval_minutes: number;
 }
 
 const parseHeaders = (value?: string | null): Record<string, string> => {
@@ -86,11 +91,32 @@ const probe = async (monitor: MonitorForRun): Promise<Omit<RawCheckPayload, "mon
   }
 };
 
+const probeWithRetries = async (
+  monitor: MonitorForRun,
+  maxAttempts = 3,
+  delayMs = 1000,
+): Promise<Omit<RawCheckPayload, "monitor_id" | "checked_at">> => {
+  let lastResult: Omit<RawCheckPayload, "monitor_id" | "checked_at"> | null = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const res = await probe(monitor);
+    if (res.status === "healthy" || res.status === "degraded") {
+      return res;
+    }
+    lastResult = res;
+    if (attempt < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+
+  return lastResult!;
+};
+
 export const runMonitorCheck = async (
   monitor: MonitorForRun,
 ): Promise<RawCheckPayload> => {
   const checkedAt = new Date().toISOString();
-  const probeResult = await probe(monitor);
+  const probeResult = await probeWithRetries(monitor);
   await createCheckRecord({
     monitorId: monitor.id,
     status: probeResult.status,
@@ -105,10 +131,19 @@ export const runMonitorCheck = async (
   if (probeResult.status === "healthy") {
     if (openIncident) {
       await resolveIncident(openIncident.id, checkedAt);
+      void sendRecoveryAlert(monitor.workspace_id, monitor.name, monitor.url);
     }
   } else if (!openIncident) {
     await createIncident(monitor.id, probeResult.error_message, checkedAt);
+    void sendOutageAlert(monitor.workspace_id, monitor.name, monitor.url, probeResult.error_message);
   }
+
+  await updateMonitorStateAfterCheck(monitor.id, {
+    status: probeResult.status,
+    checkedAt,
+    intervalMinutes: monitor.interval_minutes ?? 5,
+    isFailure: probeResult.status === "down",
+  });
 
   return {
     monitor_id: monitor.id,
@@ -116,3 +151,26 @@ export const runMonitorCheck = async (
     checked_at: checkedAt,
   };
 };
+
+export async function runChecksInBatches(
+  monitors: MonitorForRun[],
+  concurrencyLimit = 5,
+): Promise<RawCheckPayload[]> {
+  const results: RawCheckPayload[] = [];
+  const executing: Promise<any>[] = [];
+
+  for (const monitor of monitors) {
+    const p = runMonitorCheck(monitor).then((res) => {
+      results.push(res);
+      executing.splice(executing.indexOf(p), 1);
+    });
+    executing.push(p);
+
+    if (executing.length >= concurrencyLimit) {
+      await Promise.race(executing);
+    }
+  }
+
+  await Promise.all(executing);
+  return results;
+}

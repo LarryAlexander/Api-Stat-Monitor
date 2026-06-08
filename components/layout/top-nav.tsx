@@ -35,6 +35,14 @@ export default function TopNav() {
           >
             Incidents
           </Link>
+          {process.env.NEXT_PUBLIC_BILLING_ENABLED === "true" && (
+            <Link
+              href="/dashboard/billing"
+              className={`rounded-md px-2 py-1 ${pathname === "/dashboard/billing" ? "bg-zinc-100" : "hover:bg-zinc-100"}`}
+            >
+              Billing
+            </Link>
+          )}
           <button
             onClick={() => {
               void handleSignOut();

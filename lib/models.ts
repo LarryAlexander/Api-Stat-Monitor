@@ -19,6 +19,9 @@ export interface Monitor {
   headers?: string | null;
   created_at: string;
   updated_at: string;
+  last_checked_at?: string | null;
+  next_check_at?: string | null;
+  consecutive_failures?: number;
 }
 
 export interface MonitorPayload {
@@ -83,4 +86,14 @@ export interface DashboardHistoryPoint {
   status: MonitorStatus;
   status_code: number | null;
   response_time_ms: number;
+}
+
+export interface Workspace {
+  id: string;
+  owner_id: string;
+  name: string;
+  created_at: string;
+  stripe_customer_id?: string | null;
+  subscription_status?: string | null;
+  subscription_id?: string | null;
 }
