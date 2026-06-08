@@ -13,6 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.6.0] — 2026-06-08
+
+### Added
+- **ELv2 License Transition**: Switched from MIT to Elastic License 2.0 (ELv2) to protect commercial SaaS hosting interests while encouraging open contributions.
+- **Playwright E2E Tests**: Comprehensive test suite of 20 automated tests validating authentication, API routes, layout responsiveness, and error boundaries.
+- **Lazy Firebase Admin Init**: Improved resilience of Admin SDK setup, providing developer-friendly diagnostics for missing credential variables.
+- **`TROUBLESHOOTING.md`**: Guide documenting 12 common self-hosting and configuration issues.
+
+### Fixed
+- **`proxy.ts` Auth Guards**: Fixed Next.js 16 routing config issues and excluded Stripe webhooks from the auth guard.
+- **`CRON_SECRET` Validation**: Hardened scheduled check endpoint security to strictly validate the secret token even if empty/unset.
+- **Dashboard Redirects**: Avoided server-side crashes on unauthorized dashboard loads by cleanly redirecting to `/auth/login`.
+
+---
+
 ## [v0.5.0] — 2026-06-08
 
 ### Added
@@ -77,7 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/LarryAlexander/Api-Stat-Monitor/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/LarryAlexander/Api-Stat-Monitor/compare/v0.6.0...HEAD
+[v0.6.0]: https://github.com/LarryAlexander/Api-Stat-Monitor/compare/v0.5.0...v0.6.0
 [v0.5.0]: https://github.com/LarryAlexander/Api-Stat-Monitor/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/LarryAlexander/Api-Stat-Monitor/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/LarryAlexander/Api-Stat-Monitor/compare/v0.2.0...v0.3.0
