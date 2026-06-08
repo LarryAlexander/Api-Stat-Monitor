@@ -67,6 +67,7 @@ PulseBoard is packaged to be extremely easy to deploy.
 
 *   **Self-Hosting Guide:** See [SELF_HOSTING.md](./SELF_HOSTING.md) for step-by-step instructions on deploying to **Vercel** or running in a **Docker Container** using `docker-compose.yml`.
 *   **Production Hardening details:** See [DEPLOY.md](./DEPLOY.md) to set up production service accounts and secrets.
+*   **Running into issues?** See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for a full list of known issues and fixes.
 
 ---
 
