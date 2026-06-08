@@ -221,6 +221,36 @@ The alert system tries SMTP first, then Resend, then falls back to console loggi
 
 ---
 
+## Sign-up fails with "auth/configuration-not-found"
+
+**Symptom:** Clicking "Create account" shows an error, and the browser console or server log contains `auth/configuration-not-found`.
+
+**Root Cause:** The **Email/Password sign-in provider is disabled** in your Firebase project. Firebase rejects all `createUserWithEmailAndPassword` calls before they even reach your server.
+
+**Fix:**
+1. Open [Firebase Console → Authentication → Sign-in providers](https://console.firebase.google.com/project/_/authentication/providers)
+2. Click **Email/Password**
+3. Toggle **Enable** → **Save**
+
+Done. No code changes needed.
+
+---
+
+## Firebase Admin SDK uses wrong credentials after adding env vars
+
+**Symptom:** You added `FIREBASE_CLIENT_EMAIL` and `FIREBASE_PRIVATE_KEY` to `.env.local`, but the server still returns ADC (Application Default Credentials) errors like `identitytoolkit.googleapis.com requires a quota project`.
+
+**Root Cause:** The Firebase Admin SDK initializes once at module load time. If the dev server was **already running** when you added the credentials, it cached a no-credential instance — the hot reload of env vars doesn't re-initialize it.
+
+**Fix:** Fully restart the dev server after adding credentials:
+```bash
+# Ctrl+C to stop, then:
+npm run dev
+```
+The updated `lib/firebase/admin.ts` now uses a lazy getter to prevent this, but a restart is still required if the app was already initialized without credentials.
+
+---
+
 ## Build succeeds but app crashes in production
 
 **Symptom:** `npm run build` passes, but the deployed app crashes immediately.
