@@ -6,6 +6,14 @@ It is designed to be run as a **completely free self-hosted dashboard** for deve
 
 ---
 
+## Screenshots
+
+| Dashboard | Incidents History |
+|---|---|
+| ![PulseBoard Dashboard](public/screenshots/dashboard.png) | ![PulseBoard Incidents](public/screenshots/incidents.png) |
+
+---
+
 ## Key Features
 
 *   🔒 **Secure Workspace Isolation:** User account creation and authentication powered by Firebase Auth.
